@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .bg-medical-blue {
+    background-color: #0A5C8A;
+  }
+  .text-medical-blue {
+    color: #0A5C8A;
+  }
+  .bg-life-green {
+    background-color: #2E8B57;
+  }
+  .text-life-green {
+    color: #2E8B57;
+  }
+  .bg-tech-gray {
+    background-color: #F5F7FA;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
