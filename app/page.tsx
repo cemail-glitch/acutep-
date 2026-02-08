@@ -534,8 +534,8 @@ export default function Home() {
                     <p className="max-w-[200px]">{t.demo.placeholder}</p>
                  </div>
                )}
-               <div className="absolute -bottom-10 -right-10 text-gray-50 pointer-events-none select-none">
-                 <Brain size={240} />
+               <div className="absolute -bottom-5 -right-5 text-gray-50 pointer-events-none select-none opacity-30 z-0">
+                 <Brain size={180} />
                </div>
             </div>
           </div>
