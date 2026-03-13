@@ -4,7 +4,19 @@ import { getAiDiagnosisSimulation } from '@/lib/deepseekService';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { imaging, crp, whiteCell, painLevel, lang = 'en' } = body;
+    const { imaging, crp, whiteCell, painLevel, lang = 'en', question } = body;
+
+    if (question) {
+      const diagnosisData = {
+        imaging: question,
+        crp: '0',
+        whiteCell: '0',
+        painLevel: '0',
+      };
+
+      const result = await getAiDiagnosisSimulation(diagnosisData, lang);
+      return NextResponse.json({ diagnosis: result.diagnosis });
+    }
 
     if (!imaging || !crp || !whiteCell || !painLevel) {
       return NextResponse.json(

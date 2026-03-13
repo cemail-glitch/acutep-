@@ -15,7 +15,9 @@ export const getAiDiagnosisSimulation = async (
 
   const languageInstruction = lang === 'zh'
     ? '请用简体中文提供输出。'
-    : 'Please provide the output in English.';
+    : 'Please provide output in English.';
+
+  const isChatRequest = data.imaging !== '' && data.crp === '0' && data.whiteCell === '0' && data.painLevel === '0';
 
   try {
     const response = await axios.post(
@@ -25,11 +27,13 @@ export const getAiDiagnosisSimulation = async (
         messages: [
           {
             role: 'system',
-            content: `You are a highly specialized medical AI system called PancreaScan-AI. Your task is to analyze patient data and provide a structured diagnosis for Acute Pancreatitis simulation. ${languageInstruction}`,
+            content: `你是一名胰腺炎方面专家，You are a highly specialized medical AI system called PancreaScan-AI. Your task is to provide professional medical advice about pancreatitis. ${languageInstruction} 请用简洁、专业的语言回答问题，避免使用Markdown格式符号如**，使用换行来组织内容。`,
           },
           {
             role: 'user',
-            content: `Perform a simulation of the PancreaScan-AI system. 
+            content: isChatRequest 
+              ? `${lang === 'zh' ? '作为胰腺炎专家，请回答以下问题：' : 'As a pancreatitis expert, please answer the following question:'} ${data.imaging}`
+              : `Perform a simulation of PancreaScan-AI system. 
 Input Data:
 - Imaging Findings: ${data.imaging}
 - CRP Level: ${data.crp} mg/L
@@ -45,8 +49,8 @@ Output a structured JSON diagnosis with the following fields:
 ${languageInstruction}`,
           },
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.5,
+        max_tokens: 500,
       },
       {
         headers: {
@@ -59,22 +63,32 @@ ${languageInstruction}`,
     const content = response.data.choices[0]?.message?.content || '{}';
     
     let result: DiagnosisResult;
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? jsonMatch[0] : content;
-      result = JSON.parse(jsonStr);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
+    
+    if (isChatRequest) {
       result = {
-        diagnosis: lang === 'zh' ? '急性胰腺炎' : 'Acute Pancreatitis',
+        diagnosis: content,
         severity: 'Moderate',
         probability: '94.7%',
-        recommendations: [
-          lang === 'zh' ? '住院观察' : 'Hospital admission',
-          lang === 'zh' ? '禁食' : 'NPO status',
-          lang === 'zh' ? '静脉补液' : 'Intravenous fluids',
-        ],
+        recommendations: [],
       };
+    } else {
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : content;
+        result = JSON.parse(jsonStr);
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', content);
+        result = {
+          diagnosis: lang === 'zh' ? '急性胰腺炎' : 'Acute Pancreatitis',
+          severity: 'Moderate',
+          probability: '94.7%',
+          recommendations: [
+            lang === 'zh' ? '住院观察' : 'Hospital admission',
+            lang === 'zh' ? '禁食' : 'NPO status',
+            lang === 'zh' ? '静脉补液' : 'Intravenous fluids',
+          ],
+        };
+      }
     }
 
     return result;
