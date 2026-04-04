@@ -156,6 +156,7 @@ const processSteps: ProcessStep[] = [
     id: 2,
     title: '初步沟通与需求评估',
     description: '专职联络员对接沟通',
+    icon: 'message',
     details: [
       '了解医院信息化基础',
       '评估临床使用场景',
@@ -166,6 +167,7 @@ const processSteps: ProcessStep[] = [
     id: 3,
     title: '方案定制与伦理报备',
     description: '制定个性化实施方案',
+    icon: 'clipboard',
     details: [
       '提供详细技术方案',
       '协助伦理审查报备',
@@ -176,6 +178,7 @@ const processSteps: ProcessStep[] = [
     id: 4,
     title: '签署合作协议',
     description: '明确双方权责',
+    icon: 'pen',
     details: [
       '审议并签署合作协议',
       '明确数据使用与知识产权',
@@ -186,6 +189,7 @@ const processSteps: ProcessStep[] = [
     id: 5,
     title: '部署实施与培训',
     description: '系统部署与人员培训',
+    icon: 'server',
     details: [
       '完成系统部署与调试',
       '组织临床操作培训',
@@ -196,6 +200,7 @@ const processSteps: ProcessStep[] = [
     id: 6,
     title: '临床落地与持续迭代',
     description: '正式投入使用',
+    icon: 'activity',
     details: [
       '开展临床应用',
       '定期随访与效果评估',
