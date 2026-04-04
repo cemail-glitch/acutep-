@@ -9,17 +9,18 @@
 }
 
 @layer utilities {
+  /* 统一使用 tailwind.config.ts 中定义的颜色 */
   .bg-medical-blue {
-    background-color: #0A5C8A;
+    background-color: #0066CC;
   }
   .text-medical-blue {
-    color: #0A5C8A;
+    color: #0066CC;
   }
   .bg-life-green {
-    background-color: #2E8B57;
+    background-color: #28A745;
   }
   .text-life-green {
-    color: #2E8B57;
+    color: #28A745;
   }
   .bg-tech-gray {
     background-color: #F5F7FA;
