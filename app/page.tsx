@@ -26,6 +26,7 @@ import TechnologySection from '@/app/components/TechnologySection';
 import TeamSection from '@/app/components/TeamSection';
 import CooperationSection from '@/app/components/CooperationSection';
 import Footer from '@/app/components/Footer';
+import ExpertChat from '@/app/components/ExpertChat';
 
 const translations = {
   en: {
@@ -260,6 +261,8 @@ export default function Home() {
       <TeamSection lang={lang} />
 
       <CooperationSection lang={lang} />
+
+      <ExpertChat lang={lang} />
 
       <Footer lang={lang} />
     </div>
