@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, Clock, Shield, Activity, TrendingUp, Brain, ArrowRight, CheckCircle, Users, Heart, Zap, Eye } from 'lucide-react';
+import { AlertTriangle, Clock, Shield, CheckCircle2, Activity, TrendingUp, Brain, ArrowRight, CheckCircle, Users, Hospital } from 'lucide-react';
 
 interface PainPointsSectionProps {
   lang: 'en' | 'zh';
@@ -11,14 +11,14 @@ const painPointsData = [
   {
     icon: Clock,
     title: '早期识别滞后',
-    description: '传统评分系统需入院 24-48h 完整数据才能评估，急性胰腺炎发病 6-24h 的黄金干预窗口往往被错过。',
+    description: '传统评分系统（APACHE Ⅱ、BISAP）需入院 24-48h 完整数据才能评估，急性胰腺炎发病 6-24h 的黄金干预窗口往往被错过。',
     harm: '高危患者漏判、延误最佳治疗时机',
     solution: '发病 6h 内即可预警'
   },
   {
     icon: TrendingUp,
     title: '评分系统静态',
-    description: '瞬时心率仅反映当下状态，而 72h 心率动态轨迹才是预后的核心预测因子。',
+    description: '瞬时心率仅反映当下状态，而 72h 心率动态轨迹才是预后的核心预测因子。传统单次检测价值有限。',
     harm: '重症转化难以早期预警',
     solution: '72h 连续轨迹分析'
   },
@@ -39,15 +39,15 @@ const painPointsData = [
 ];
 
 const statistics = [
-  { value: '181亿', label: '全国AP医疗消耗', sublabel: '年度支出', color: 'from-primary to-primary-light' },
-  { value: '30%', label: '重症死亡率', sublabel: '传统诊疗', color: 'from-accent to-accent-light' },
-  { value: '72h', label: '连续监测缺失', sublabel: '动态轨迹难以追踪', color: 'from-primary-light to-accent' }
+  { value: '181亿', label: '全国AP医疗消耗', desc: '年度支出' },
+  { value: '30%', label: '重症死亡率', desc: '传统诊疗' },
+  { value: '72h', label: '连续监测缺失', desc: '动态轨迹难以追踪' }
 ];
 
 const solutionsData = [
   {
     tech: 'digital',
-    icon: Eye,
+    icon: Activity,
     title: '数字望诊',
     subtitle: '无创无辐射',
     color: 'from-primary to-primary-light',
@@ -59,7 +59,7 @@ const solutionsData = [
     icon: TrendingUp,
     title: '轨迹解密',
     subtitle: '实时动态分型',
-    color: 'from-primary-light to-accent',
+    color: 'from-primary-light to-primary',
     points: ['心率多维动态轨迹', 'T1-T4 四类亚型自动分型', '1 分钟内完成预警'],
     highlight: 'AUC 0.91'
   },
@@ -68,24 +68,17 @@ const solutionsData = [
     icon: Brain,
     title: '蜂群网络',
     subtitle: '数据不动模型动',
-    color: 'from-accent to-primary-light',
+    color: 'from-primary to-primary-light',
     points: ['边缘密算隐私保护', '跨中心性能波动 ≤5%', '基层准确率提升 29.2%'],
     highlight: '100% 合规'
   }
 ];
 
-const metricsData = [
-  { label: '轻度识别', value: 89.7, color: '#10b981' },
-  { label: '中度识别', value: 87.3, color: '#f59e0b' },
-  { label: '重度识别', value: 91.5, color: '#ef4444' },
-  { label: '计算效率提升', value: 93.2, color: '#3b82f6' }
-];
-
 export default function PainPointsSection({ lang }: PainPointsSectionProps) {
   return (
-    <section id="pain-points" className="py-20 md:py-28 bg-gradient-to-b from-bg-primary via-white to-white">
+    <section id="painpoints" className="py-20 md:py-28 bg-gradient-to-b from-bg-primary to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
             {lang === 'zh' ? '破解急性胰腺炎诊疗瓶颈' : 'Solving AP Diagnosis Bottlenecks'}
           </h2>
@@ -97,42 +90,39 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
         </div>
 
         <div className="bg-gradient-to-br from-primary via-primary-light to-primary rounded-3xl p-8 md:p-10 mb-12 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-light/10 rounded-full blur-3xl"></div>
           </div>
           <div className="relative z-10">
             <div className="text-center mb-8">
               <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
                 {lang === 'zh' ? '急性胰腺炎（AP）四大核心痛点' : 'Four Core Pain Points of AP'}
               </h3>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/80">
                 {lang === 'zh' ? '"早期识别滞后、评分系统静态、监测手段有创、诊疗方式单一"' : '"Delayed recognition, Static scoring, Invasive monitoring, Single treatment"'}
               </p>
             </div>
-            
-            <div className="grid grid-cols-3 gap-4 md:gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               {statistics.map((stat, index) => (
-                <div key={index} className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 md:p-6 text-center border border-white/20 hover:bg-white/20 transition-all">
-                  <div className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-white font-semibold mb-1">{stat.label}</div>
-                  <div className="text-xs text-white/60">{stat.sublabel}</div>
+                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className="text-sm text-white/80 font-medium mb-1">{stat.label}</div>
+                  <div className="text-xs text-white/60">{stat.desc}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {painPointsData.map((point, index) => (
             <div
               key={index}
-              className="group bg-white rounded-2xl p-6 shadow-sm border border-accent/20 hover:shadow-xl hover:border-accent/40 transition-all duration-300"
+              className="group bg-white rounded-2xl p-6 shadow-sm border border-accent/20 hover:shadow-lg hover:border-accent/40 transition-all"
             >
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors">
                   <point.icon className="w-6 h-6 text-accent" />
                 </div>
                 <div>
@@ -140,10 +130,10 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
                   <p className="text-sm text-primary/70 leading-relaxed">{point.description}</p>
                 </div>
               </div>
-              <div className="bg-rose-50 border-l-4 border-rose-400 p-3 rounded-r-lg mb-3">
-                <p className="text-xs text-rose-700 font-medium">{point.harm}</p>
+              <div className="bg-accent/10 border-l-4 border-accent p-3 rounded-r-lg mb-3">
+                <p className="text-xs text-primary font-medium">{point.harm}</p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-emerald-600 font-semibold">
+              <div className="flex items-center gap-2 text-xs text-accent font-medium">
                 <CheckCircle className="w-4 h-4" />
                 <span>{point.solution}</span>
               </div>
@@ -152,15 +142,16 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
         </div>
 
         <div className="bg-gradient-to-br from-primary via-primary-light to-primary rounded-3xl p-8 md:p-12 mb-16 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-light/10 rounded-full blur-3xl"></div>
           </div>
           <div className="relative z-10">
             <div className="text-center mb-10">
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
                 {lang === 'zh' ? '三大核心技术融合解决方案' : 'Three Core Technology Solutions'}
               </h3>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/80">
                 {lang === 'zh' ? '数字望诊 + 轨迹解密 + 蜂群网络' : 'Digital Diagnosis + Trajectory + Swarm Network'}
               </p>
             </div>
@@ -169,10 +160,10 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
               {solutionsData.map((solution) => (
                 <div
                   key={solution.tech}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 hover:scale-105 transition-all duration-300"
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${solution.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                    <div className={`w-12 h-12 bg-gradient-to-br ${solution.color} rounded-xl flex items-center justify-center`}>
                       <solution.icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -183,13 +174,13 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
                   <ul className="space-y-2 mb-4">
                     {solution.points.map((point, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-white/90">
-                        <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-accent-light mt-0.5 flex-shrink-0" />
                         {point}
                       </li>
                     ))}
                   </ul>
                   <div className={`inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r ${solution.color} rounded-full text-xs font-semibold text-white`}>
-                    <Zap className="w-3 h-3" />
+                    <CheckCircle className="w-3 h-3" />
                     {solution.highlight}
                   </div>
                 </div>
@@ -198,8 +189,8 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-primary-bg to-white rounded-2xl p-6 border border-accent/20">
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-gradient-to-br from-bg-primary to-bg-secondary rounded-2xl p-8 border border-accent/20">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
                 <Activity className="w-6 h-6 text-white" />
@@ -210,25 +201,29 @@ export default function PainPointsSection({ lang }: PainPointsSectionProps) {
               </div>
             </div>
             <div className="space-y-3">
-              {metricsData.map((metric, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <span className="text-sm text-primary/70 w-28">{metric.label}</span>
-                  <div className="flex-1 bg-primary/10 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${metric.value}%`, backgroundColor: metric.color }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-bold text-primary w-14 text-right">{metric.value}%</span>
-                </div>
-              ))}
+              <div className="flex justify-between items-center py-2 border-b border-accent/20">
+                <span className="text-sm text-primary/70">{lang === 'zh' ? '轻度识别' : 'Mild Accuracy'}</span>
+                <span className="font-bold text-accent">89.7%</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-accent/20">
+                <span className="text-sm text-primary/70">{lang === 'zh' ? '中度识别' : 'Moderate Accuracy'}</span>
+                <span className="font-bold text-accent">87.3%</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-accent/20">
+                <span className="text-sm text-primary/70">{lang === 'zh' ? '重度识别' : 'Severe Accuracy'}</span>
+                <span className="font-bold text-accent">91.5%</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-primary/70">{lang === 'zh' ? '计算复杂度降低' : 'Complexity Reduction'}</span>
+                <span className="font-bold text-accent">93.2%</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-accent/5 to-white rounded-2xl p-6 border border-accent/20">
+          <div className="bg-gradient-to-br from-bg-primary to-bg-secondary rounded-2xl p-8 border border-accent/20">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-accent rounded-xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h4 className="text-lg font-bold text-primary">{lang === 'zh' ? '轨迹解密' : 'Trajectory'}</h4>
