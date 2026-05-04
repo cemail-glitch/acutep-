@@ -90,8 +90,8 @@ const cooperationModels = [
     icon: FileText,
     color: 'from-accent-light to-accent',
     hospitals: [
-      { name: '塘山街道卫生服务中心', logo: '/OIP-C (5).jpg' },
-      { name: '十字街街道社区卫生服务中心', logo: '/OIP-C (18).webp' }
+      { name: '塘山街道卫生服务中心', logo: '/OIP-C (20).webp' },
+      { name: '十字街街道社区卫生服务中心', logo: '/OIP-C (21)(1).webp' }
     ]
   }
 ];
