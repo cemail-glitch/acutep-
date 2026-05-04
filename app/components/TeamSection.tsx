@@ -100,7 +100,9 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                   {expert.iconSrc ? (
                     <Image src={expert.iconSrc} alt={expert.name} width={40} height={40} className="object-contain" />
                   ) : (
-                    <expert.icon className="w-7 h-7 text-accent" />
+                    typeof expert.icon === 'function' ? (
+                      <expert.icon className="w-7 h-7 text-accent" />
+                    ) : null
                   )}
                 </div>
                 <div className="flex-1">
