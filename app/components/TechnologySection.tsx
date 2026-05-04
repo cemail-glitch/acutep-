@@ -14,7 +14,9 @@ import {
   AlertTriangle,
   Clock,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Zap,
+  ArrowUpRight
 } from 'lucide-react';
 import {
   LineChart,
@@ -91,8 +93,36 @@ const federatedBenefits = [
   '完全符合医疗合规要求'
 ];
 
+const techCards = [
+  {
+    id: 'digital' as const,
+    icon: Eye,
+    title: '数字望诊',
+    subtitle: '多模态融合 AP 特征面',
+    color: 'from-primary to-primary-light',
+    highlights: ['无创无辐射', '轻/中/重度识别率 89.7%/87.3%/91.5%', '计算复杂度降低 93.2%']
+  },
+  {
+    id: 'trajectory' as const,
+    icon: TrendingUp,
+    title: '轨迹解密',
+    subtitle: '心率轨迹 + T1-T4 分型',
+    color: 'from-primary-light to-accent',
+    highlights: ['AUC 0.91 重症预测', '72h 连续轨迹分析', '1 分钟内完成预警']
+  },
+  {
+    id: 'swarm' as const,
+    icon: Brain,
+    title: '蜂群网络',
+    subtitle: '数据不动模型动',
+    color: 'from-accent to-primary-light',
+    highlights: ['边缘密算隐私保护', '跨中心性能波动 ≤5%', '基层准确率提升 29.2%']
+  }
+];
+
 export default function TechnologySection({ lang }: TechnologySectionProps) {
   const [activeTab, setActiveTab] = useState<'digital' | 'trajectory' | 'swarm'>('digital');
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const tabs = [
     { id: 'digital' as const, label: '数字望诊', icon: Eye, color: 'primary' },
@@ -107,7 +137,7 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
   };
 
   return (
-    <section id="tech" className="py-20 md:py-28 bg-white">
+    <section id="tech" className="py-20 md:py-28 bg-gradient-to-b from-white via-bg-primary to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
@@ -120,31 +150,47 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
           </p>
         </div>
 
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex bg-primary-bg rounded-full p-1.5 gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
-                  activeTab === tab.id
-                    ? `${colorMap[tab.color].gradient} text-white shadow-lg`
-                    : 'text-primary hover:bg-white/80 bg-white/30'
-                }`}
-              >
-                <tab.icon size={18} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          {techCards.map((card) => (
+            <button
+              key={card.id}
+              onClick={() => setActiveTab(card.id)}
+              onMouseEnter={() => setHoveredCard(card.id)}
+              onMouseLeave={() => setHoveredCard(null)}
+              className={`relative group p-6 rounded-2xl border-2 transition-all duration-300 text-left ${
+                activeTab === card.id
+                  ? 'bg-white border-accent shadow-xl scale-[1.02]'
+                  : 'bg-white/50 border-accent/20 hover:border-accent/40 hover:shadow-lg hover:bg-white'
+              }`}
+            >
+              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                <card.icon className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-primary mb-1">{card.title}</h3>
+              <p className="text-sm text-accent mb-4">{card.subtitle}</p>
+              <div className="space-y-2">
+                {card.highlights.map((highlight, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-primary/70">
+                    <CheckCircle className="w-3.5 h-3.5 text-accent" />
+                    <span>{highlight}</span>
+                  </div>
+                ))}
+              </div>
+              {activeTab === card.id && (
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+              )}
+            </button>
+          ))}
         </div>
 
         <div className="bg-gradient-to-br from-bg-primary to-bg-secondary rounded-3xl p-8 md:p-12">
           {activeTab === 'digital' && (
             <div className="grid lg:grid-cols-2 gap-12">
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center shadow-lg">
                     <Eye className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -153,46 +199,43 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                   </div>
                 </div>
 
-                <p className="text-text-secondary leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed">
                   {lang === 'zh'
                     ? '首次将多模态融合技术应用于急性胰腺炎面部特征识别，精准定位面部关键特征指标，构建标准化特征面模型。相较于传统评分系统，计算复杂度大幅降低，全程无创无辐射。'
                     : 'First application of multi-modal fusion technology for AP facial feature recognition, achieving precise localization of key facial indicators with non-invasive, radiation-free assessment.'}
                 </p>
 
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span className="text-text-secondary">{lang === 'zh' ? '轻/中/重度识别准确率 89.7% / 87.3% / 91.5%' : 'Mild/Moderate/Severe Accuracy: 89.7% / 87.3% / 91.5%'}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span className="text-text-secondary">{lang === 'zh' ? '计算复杂度降低 93.2%' : 'Computational Complexity Reduced by 93.2%'}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span className="text-text-secondary">{lang === 'zh' ? '全程无创无辐射，适合频繁监测' : 'Non-invasive, no radiation, suitable for frequent monitoring'}</span>
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: '轻度识别', value: '89.7%', color: '#10b981' },
+                    { label: '中度识别', value: '87.3%', color: '#f59e0b' },
+                    { label: '重度识别', value: '91.5%', color: '#ef4444' },
+                    { label: '效率提升', value: '93.2%', color: '#3b82f6' },
+                  ].map((metric, index) => (
+                    <div key={index} className="bg-white rounded-xl p-4 border border-accent/20 hover:shadow-md transition-shadow">
+                      <div className="text-2xl font-bold mb-1" style={{ color: metric.color }}>{metric.value}</div>
+                      <div className="text-xs text-primary/60">{metric.label}</div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm">
-                  <h4 className="font-bold text-primary mb-4">{lang === 'zh' ? '适用场景' : 'Application Scenarios'}</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-accent/10 rounded-lg p-3 text-center border border-accent/20">
-                      <Activity className="w-5 h-5 text-accent mx-auto mb-1" />
-                      <span className="text-xs text-primary font-medium">{lang === 'zh' ? '急诊初筛' : 'Emergency'}</span>
-                    </div>
-                    <div className="bg-accent/10 rounded-lg p-3 text-center border border-accent/20">
-                      <Clock className="w-5 h-5 text-accent mx-auto mb-1" />
-                      <span className="text-xs text-primary font-medium">{lang === 'zh' ? '门诊随诊' : 'Outpatient'}</span>
-                    </div>
-                    <div className="bg-accent/10 rounded-lg p-3 text-center border border-accent/20">
-                      <Brain className="w-5 h-5 text-accent mx-auto mb-1" />
-                      <span className="text-xs text-primary font-medium">{lang === 'zh' ? 'ICU 监测' : 'ICU'}</span>
-                    </div>
-                    <div className="bg-accent/10 rounded-lg p-3 text-center border border-accent/20">
-                      <Shield className="w-5 h-5 text-accent mx-auto mb-1" />
-                      <span className="text-xs text-primary font-medium">{lang === 'zh' ? '基层筛查' : 'Primary'}</span>
-                    </div>
+                <div className="bg-white rounded-2xl p-6 border border-accent/20">
+                  <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-accent" />
+                    {lang === 'zh' ? '适用场景' : 'Application Scenarios'}
+                  </h4>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { icon: Activity, label: '急诊初筛' },
+                      { icon: Clock, label: '门诊随诊' },
+                      { icon: Brain, label: 'ICU 监测' },
+                      { icon: Shield, label: '基层筛查' },
+                    ].map((item, index) => (
+                      <div key={index} className="bg-accent/10 rounded-lg p-3 text-center border border-accent/20 hover:bg-accent/20 transition-colors">
+                        <item.icon className="w-5 h-5 text-accent mx-auto mb-1" />
+                        <span className="text-xs text-primary font-medium">{item.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -214,9 +257,9 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
 
           {activeTab === 'trajectory' && (
             <div className="grid lg:grid-cols-2 gap-12">
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-light to-primary rounded-2xl flex items-center justify-center">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary-light to-primary rounded-2xl flex items-center justify-center shadow-lg">
                     <TrendingUp className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -225,17 +268,20 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                   </div>
                 </div>
 
-                <p className="text-text-secondary leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed">
                   {lang === 'zh'
-                    ? '以心率为核心，融合血压、呼吸频率、体温、血氧饱和度等多维生命体征，构建动态轨迹分析。基于 AI 模型将患者分为 T1-T4 四类临床亚型，自动输出风险预警与个性化诊疗建议，显著优于传统 APACHE Ⅱ、BISAP 评分。'
-                    : 'Using heart rate as the core, we construct multi-dimensional vital sign trajectories. AI model classifies patients into 4 clinical subtypes, significantly outperforming traditional APACHE II and BISAP scores.'}
+                    ? '以心率为核心，融合血压、呼吸频率、体温、血氧饱和度等多维生命体征，构建动态轨迹分析。基于 AI 模型将患者分为 T1-T4 四类临床亚型，自动输出风险预警与个性化诊疗建议。'
+                    : 'Using heart rate as the core, we construct multi-dimensional vital sign trajectories. AI model classifies patients into 4 clinical subtypes.'}
                 </p>
 
-                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm mb-6">
-                  <h4 className="font-bold text-primary mb-4">{lang === 'zh' ? 'GBTM 临床亚型' : 'GBTM Clinical Subtypes'}</h4>
+                <div className="bg-white rounded-2xl p-6 border border-accent/20">
+                  <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-accent" />
+                    {lang === 'zh' ? 'GBTM 临床亚型' : 'GBTM Clinical Subtypes'}
+                  </h4>
                   <div className="space-y-3">
                     {subtypes.map((subtype, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg border border-accent/10">
+                      <div key={index} className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg border border-accent/10 hover:border-accent/30 transition-colors">
                         <div className={`w-3 h-3 rounded-full ${subtype.riskColor}`}></div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
@@ -255,7 +301,7 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
 
                 <div className="grid grid-cols-3 gap-3">
                   {clinicalMetrics.map((metric, index) => (
-                    <div key={index} className="bg-white rounded-xl p-4 text-center border border-accent/20 shadow-sm">
+                    <div key={index} className="bg-white rounded-xl p-4 text-center border border-accent/20 shadow-sm hover:shadow-md transition-shadow">
                       <div className="text-2xl font-bold mb-1" style={{ color: metric.color }}>{metric.value}</div>
                       <div className="text-xs text-primary/60">{metric.name}</div>
                     </div>
@@ -263,10 +309,10 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                 </div>
               </div>
 
-              <div>
-                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm mb-6">
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm">
                   <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-accent" />
+                    <TrendingUp className="w-5 h-5 text-accent" />
                     {lang === 'zh' ? '72h 心率轨迹对比' : '72h Heart Rate Trajectory'}
                   </h4>
                   <ResponsiveContainer width="100%" height={250}>
@@ -291,7 +337,7 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
 
                 <div className="bg-gradient-to-r from-primary to-primary-light rounded-2xl p-6 text-white shadow-lg">
                   <h4 className="font-bold mb-4 flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5" />
+                    <Zap className="w-5 h-5" />
                     {lang === 'zh' ? '性能优势' : 'Performance'}
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
@@ -319,9 +365,9 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
 
           {activeTab === 'swarm' && (
             <div className="grid lg:grid-cols-2 gap-12">
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center shadow-lg">
                     <Network className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -330,17 +376,20 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                   </div>
                 </div>
 
-                <p className="text-text-secondary leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed">
                   {lang === 'zh'
                     ? '基于边缘密算架构，实现"数据不动模型动"的隐私保护协同模式。各中心数据不出本地，通过加密参数交互持续优化全局模型，跨中心性能波动极小。'
-                    : 'Based on edge computing architecture, enabling privacy-preserving collaboration where "data stays local, models move". Each center\'s data remains local while encrypted parameters are exchanged.'}
+                    : 'Based on edge computing architecture, enabling privacy-preserving collaboration where "data stays local, models move".'}
                 </p>
 
-                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm mb-6">
-                  <h4 className="font-bold text-primary mb-4">{lang === 'zh' ? '核心优势' : 'Core Advantages'}</h4>
+                <div className="bg-white rounded-2xl p-6 border border-accent/20">
+                  <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-accent" />
+                    {lang === 'zh' ? '核心优势' : 'Core Advantages'}
+                  </h4>
                   <div className="space-y-3">
                     {federatedBenefits.map((benefit, index) => (
-                      <div key={index} className="flex items-center gap-3">
+                      <div key={index} className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg hover:bg-accent/10 transition-colors">
                         <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
                           <CheckCircle className="w-5 h-5 text-accent" />
                         </div>
@@ -350,8 +399,11 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-primary to-primary-light rounded-2xl p-6 text-white shadow-lg">
-                  <h4 className="font-bold mb-4">{lang === 'zh' ? '临床验证结果' : 'Clinical Results'}</h4>
+                <div className="bg-gradient-to-r from-accent to-primary-light rounded-2xl p-6 text-white shadow-lg">
+                  <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <ArrowUpRight className="w-5 h-5" />
+                    {lang === 'zh' ? '临床验证结果' : 'Clinical Results'}
+                  </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/20 rounded-xl p-4 text-center backdrop-blur-sm">
                       <div className="text-3xl font-bold">89.5%</div>
@@ -373,39 +425,32 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                 </div>
               </div>
 
-              <div>
-                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm mb-6">
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl p-6 border border-accent/20 shadow-sm">
                   <h4 className="font-bold text-primary mb-4">{lang === 'zh' ? '边缘密算架构示意' : 'Edge Computing Architecture'}</h4>
                   <div className="relative">
-                    <div className="flex justify-center mb-4">
-                      <div className="bg-gradient-to-r from-primary to-primary-light text-white px-6 py-3 rounded-full font-semibold shadow-lg">
+                    <div className="flex justify-center mb-6">
+                      <div className="bg-gradient-to-r from-primary to-primary-light text-white px-6 py-3 rounded-full font-semibold shadow-lg flex items-center gap-2">
+                        <Network className="w-5 h-5" />
                         {lang === 'zh' ? '全局模型' : 'Global Model'}
                       </div>
                     </div>
-                    <div className="flex justify-center gap-8">
-                      <div className="text-center">
-                        <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center mb-2 mx-auto border-2 border-accent/30 shadow-sm overflow-hidden">
-                          <Image src="/c7f1dbb85e10e235.png" alt="南昌大学第一附属医院" width={60} height={60} className="object-contain" />
+                    <div className="flex justify-center gap-6 md:gap-10">
+                      {[
+                        { src: '/c7f1dbb85e10e235.png', name: '南昌大学第一附属医院' },
+                        { src: '/OIP-C (19).webp', name: '南昌市高新区人民医院' },
+                        { src: '/home_logo(1).png', name: '广州市第一人民医院' },
+                      ].map((hospital, index) => (
+                        <div key={index} className="text-center group">
+                          <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl flex items-center justify-center mb-2 mx-auto border-2 border-accent/30 shadow-sm overflow-hidden transition-all group-hover:border-accent group-hover:scale-105">
+                            <Image src={hospital.src} alt={hospital.name} width={60} height={60} className="object-contain" />
+                          </div>
+                          <div className="text-xs md:text-sm font-medium text-primary">{hospital.name}</div>
+                          <div className="text-xs text-primary/50">{lang === 'zh' ? '数据不出院' : 'Local'}</div>
                         </div>
-                        <div className="text-sm font-medium text-primary">{lang === 'zh' ? '南昌大学第一附属医院' : 'First Affiliated Hospital'}</div>
-                        <div className="text-xs text-primary/50">{lang === 'zh' ? '数据不出院' : 'Local'}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center mb-2 mx-auto border-2 border-accent/30 shadow-sm overflow-hidden">
-                          <Image src="/OIP-C (19).webp" alt="南昌市高新区人民医院" width={60} height={60} className="object-contain" />
-                        </div>
-                        <div className="text-sm font-medium text-primary">{lang === 'zh' ? '南昌市高新区人民医院' : 'Gaoxin People\'s Hospital'}</div>
-                        <div className="text-xs text-primary/50">{lang === 'zh' ? '数据不出院' : 'Local'}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center mb-2 mx-auto border-2 border-accent/30 shadow-sm overflow-hidden">
-                          <Image src="/home_logo(1).png" alt="广州市第一人民医院" width={60} height={60} className="object-contain" />
-                        </div>
-                        <div className="text-sm font-medium text-primary">{lang === 'zh' ? '广州市第一人民医院' : 'Guangzhou First People\'s Hospital'}</div>
-                        <div className="text-xs text-primary/50">{lang === 'zh' ? '数据不出院' : 'Local' }</div>
-                      </div>
+                      ))}
                     </div>
-                    <div className="flex justify-center mt-4">
+                    <div className="flex justify-center mt-6">
                       <div className="flex items-center gap-2 text-sm text-primary/60 bg-bg-secondary px-4 py-2 rounded-full">
                         <ChevronRight className="w-4 h-4" />
                         <span>{lang === 'zh' ? '加密参数交互' : 'Encrypted Params' }</span>
@@ -416,20 +461,21 @@ export default function TechnologySection({ lang }: TechnologySectionProps) {
                 </div>
 
                 <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-lg">
-                  <h4 className="font-bold mb-4">{lang === 'zh' ? '医疗价值' : 'Medical Value'}</h4>
+                  <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-cyan-400" />
+                    {lang === 'zh' ? '医疗价值' : 'Medical Value'}
+                  </h4>
                   <div className="space-y-3 text-sm">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
-                      <span>{lang === 'zh' ? '打破数据孤岛，跨院协同不泄露隐私' : 'Break data silos, collaborate without privacy leakage'}</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
-                      <span>{lang === 'zh' ? '模型随数据增加持续进化，性能不断提升' : 'Model evolves with data, improving continuously'}</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
-                      <span>{lang === 'zh' ? '基层医院可获得与顶级医院相当的 AI 辅助能力' : 'Primary hospitals access top-tier AI capabilities'}</span>
-                    </div>
+                    {[
+                      { text: '打破数据孤岛，跨院协同不泄露隐私' },
+                      { text: '模型随数据增加持续进化，性能不断提升' },
+                      { text: '基层医院可获得与顶级医院相当的 AI 辅助能力' },
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                        <span>{item.text}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

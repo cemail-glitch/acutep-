@@ -16,7 +16,9 @@ import {
   FileText,
   Globe,
   User,
-  Upload
+  Upload,
+  Menu,
+  X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { DiagnosisData, DiagnosisResult } from '@/lib/types';
@@ -32,10 +34,11 @@ import ExpertChat from '@/app/components/ExpertChat';
 const translations = {
   en: {
     nav: {
-      features: "Features",
-      tech: "Technology",
-      demo: "Demo",
-      request: "Request Demo"
+      features: "Core Features",
+      solution: "Solution",
+      clinical: "Clinical",
+      team: "Team",
+      experience: "Experience"
     },
     hero: {
       badge: "NEXT GEN CLINICAL AI",
@@ -61,10 +64,11 @@ const translations = {
   },
   zh: {
     nav: {
-      features: "功能特性",
-      tech: "核心技术",
-      demo: "在线演示",
-      request: "索取演示"
+      features: "核心功能",
+      solution: "解决方案",
+      clinical: "临床验证",
+      team: "团队合作",
+      experience: "体验"
     },
     hero: {
       badge: "新一代临床智能 AI",
@@ -89,32 +93,89 @@ const translations = {
 
 const Navbar = ({ lang, setLang }: { lang: 'en' | 'zh', setLang: (l: 'en' | 'zh') => void }) => {
   const t = translations[lang].nav;
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navItems = [
+    { href: '#pain-points', label: t.features },
+    { href: '#solution', label: t.solution },
+    { href: '#clinical', label: t.clinical },
+    { href: '#team', label: t.team },
+    { href: '#demo', label: t.experience }
+  ];
+
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white/80 backdrop-blur-md'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-2">
             <div className="relative w-8 h-8">
               <Image src="/logo.png" alt="Logo" fill className="object-contain" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-medical-blue">PancreaScan-AI<span className="text-gray-400 font-light">™</span></span>
+            <span className="text-xl font-bold tracking-tight text-primary">PancreaScan-AI<span className="text-gray-400 font-light">™</span></span>
           </div>
-          <div className="hidden md:flex space-x-6 font-medium text-gray-600 text-sm">
-            <a href="#tech" className="hover:text-medical-blue transition-colors">{t.tech}</a>
-            <a href="#demo" className="hover:text-medical-blue transition-colors">{t.demo}</a>
+
+          <div className="hidden md:flex space-x-8 font-medium text-primary/70 text-sm">
+            {navItems.map((item) => (
+              <a 
+                key={item.href} 
+                href={item.href} 
+                className="hover:text-accent transition-colors relative group"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full"></span>
+              </a>
+            ))}
           </div>
+
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
-              className="flex items-center space-x-1.5 text-gray-600 hover:text-medical-blue transition-colors font-medium text-sm"
+              className="flex items-center space-x-1.5 text-primary/70 hover:text-accent transition-colors font-medium text-sm"
             >
               <Globe size={16} />
               <span>{lang === 'en' ? '中文' : 'English'}</span>
             </button>
-            <button className="bg-medical-blue text-white px-5 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-lg shadow-blue-900/10 text-sm">
-              {t.request}
+            <button className="hidden sm:flex bg-gradient-to-r from-primary to-primary-light text-white px-5 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all text-sm">
+              {translations[lang].nav.features === '核心功能' ? '索取演示' : 'Request Demo'}
+            </button>
+            <button 
+              className="md:hidden p-2 text-primary"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className={`md:hidden transition-all duration-300 overflow-hidden ${
+        mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+      }`}>
+        <div className="bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+          {navItems.map((item) => (
+            <a 
+              key={item.href} 
+              href={item.href} 
+              className="block py-2 text-primary/70 hover:text-accent font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.label}
+            </a>
+          ))}
+          <button className="w-full bg-gradient-to-r from-primary to-primary-light text-white px-5 py-2 rounded-full font-semibold text-sm mt-4">
+            {translations[lang].nav.features === '核心功能' ? '索取演示' : 'Request Demo'}
+          </button>
         </div>
       </div>
     </nav>
@@ -123,7 +184,7 @@ const Navbar = ({ lang, setLang }: { lang: 'en' | 'zh', setLang: (l: 'en' | 'zh'
 
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
   <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-    <div className="mb-6 p-3 bg-blue-50 w-fit rounded-xl group-hover:bg-medical-blue group-hover:text-white transition-colors text-medical-blue">
+    <div className="mb-6 p-3 bg-blue-50 w-fit rounded-xl group-hover:bg-primary group-hover:text-white transition-colors text-primary">
       {icon}
     </div>
     <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
@@ -133,7 +194,7 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, titl
 
 const SectionHeading = ({ badge, title, subtitle }: { badge?: string, title: string, subtitle?: string }) => (
   <div className="text-center mb-16">
-    {badge && <span className="text-sm font-bold tracking-widest text-medical-blue uppercase bg-blue-50 px-4 py-1.5 rounded-full mb-4 inline-block">{badge}</span>}
+    {badge && <span className="text-sm font-bold tracking-widest text-primary uppercase bg-primary-bg px-4 py-1.5 rounded-full mb-4 inline-block">{badge}</span>}
     <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">{title}</h2>
     {subtitle && <p className="text-lg text-gray-600 max-w-2xl mx-auto">{subtitle}</p>}
   </div>
@@ -141,10 +202,10 @@ const SectionHeading = ({ badge, title, subtitle }: { badge?: string, title: str
 
 const WorkflowStep = ({ number, title, description, isLast = false }: { number: number, title: string, description: string, isLast?: boolean }) => (
   <div className="relative flex-1 flex flex-col items-center text-center px-4">
-    <div className="w-16 h-16 bg-white border-4 border-blue-50 rounded-full flex items-center justify-center text-2xl font-bold text-medical-blue mb-6 shadow-sm z-10">
+    <div className="w-16 h-16 bg-white border-4 border-primary-bg rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6 shadow-sm z-10">
       {number}
     </div>
-    {!isLast && <div className="hidden lg:block absolute top-8 left-1/2 w-full h-0.5 bg-blue-100 -z-0"></div>}
+    {!isLast && <div className="hidden lg:block absolute top-8 left-1/2 w-full h-0.5 bg-gray-200 -z-0"></div>}
     <h4 className="text-xl font-bold mb-2 text-gray-900">{title}</h4>
     <p className="text-gray-600">{description}</p>
   </div>
@@ -162,7 +223,6 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // Reset imaging field when language changes
     setFormData(prev => ({
       ...prev,
       imaging: lang === 'zh' ? '面部表情显示中度疼痛，体型偏胖。' : 'Facial expression shows moderate pain, body type appears overweight.'
@@ -255,17 +315,29 @@ export default function Home() {
     <div className="min-h-screen">
       <Navbar lang={lang} setLang={setLang} />
 
-      <HeroSection lang={lang} />
+      <section id="hero">
+        <HeroSection lang={lang} />
+      </section>
 
-      <PainPointsSection lang={lang} />
+      <section id="pain-points">
+        <PainPointsSection lang={lang} />
+      </section>
 
-      <TechnologySection lang={lang} />
+      <section id="solution">
+        <TechnologySection lang={lang} />
+      </section>
 
-      <ProductDemo lang={lang} />
+      <section id="clinical">
+        <ProductDemo lang={lang} />
+      </section>
 
-      <TeamSection lang={lang} />
+      <section id="team">
+        <TeamSection lang={lang} />
+      </section>
 
-      <CooperationSection lang={lang} />
+      <section id="demo">
+        <CooperationSection lang={lang} />
+      </section>
 
       <ExpertChat lang={lang} />
 
