@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   Activity, 
   Brain, 
@@ -40,7 +41,7 @@ const translations = {
       badge: "NEXT GEN CLINICAL AI",
       title_part1: "PancreaScan-AI",
       title_part2: "AP Heterogeneity Classification Agent",
-      subtitle: "China's first AP diagnostic agent based on dynamic heart rate trajectory LCTM classification, achieving 94.7% accuracy.",
+      subtitle: "China's first AP diagnostic agent based on dynamic heart rate trajectory GBTM classification, achieving 94.7% accuracy.",
       apply: "Request Demo",
       whitepaper: "Whitepaper"
     },
@@ -69,7 +70,7 @@ const translations = {
       badge: "新一代临床智能 AI",
       title_part1: "PancreaScan-AI",
       title_part2: "AP 异质性分型 Agent",
-      subtitle: "国内首个基于动态心率轨迹 LCTM 分型的 AP 专属诊疗 Agent，实现 94.7% 的超高准确率。",
+      subtitle: "国内首个基于动态心率轨迹 GBTM 分型的 AP 专属诊疗 Agent，实现 94.7% 的超高准确率。",
       apply: "申请产品演示",
       whitepaper: "技术白皮书"
     },
@@ -93,8 +94,8 @@ const Navbar = ({ lang, setLang }: { lang: 'en' | 'zh', setLang: (l: 'en' | 'zh'
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-2">
-            <div className="bg-medical-blue p-1.5 rounded-lg">
-              <Activity className="text-white w-5 h-5" />
+            <div className="relative w-8 h-8">
+              <Image src="/logo.png" alt="Logo" fill className="object-contain" />
             </div>
             <span className="text-xl font-bold tracking-tight text-medical-blue">PancreaScan-AI<span className="text-gray-400 font-light">™</span></span>
           </div>
@@ -167,6 +168,10 @@ export default function Home() {
       imaging: lang === 'zh' ? '面部表情显示中度疼痛，体型偏胖。' : 'Facial expression shows moderate pain, body type appears overweight.'
     }));
   }, [lang]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);

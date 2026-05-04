@@ -1,15 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Activity, 
-  Zap, 
-  ArrowRight, 
+import {
+  Activity,
+  Zap,
+  ArrowRight,
   Download,
   TrendingUp,
   Clock,
   Shield,
-  FileText
+  FileText,
+  Eye,
+  Brain,
+  Network,
+  ChevronRight
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -26,50 +30,65 @@ const trajectoryData = [
   { time: '72h', value: 25 },
 ];
 
-const coreCapabilities = [
+const threeCoreTech = [
+  {
+    icon: Eye,
+    key: 'digital',
+    label: '数字望诊',
+    labelEn: 'Digital Diagnosis',
+    desc: '多模态融合 AP 特征面，无创无辐射',
+    descEn: 'Multi-modal AP Facial Features',
+    color: 'from-primary to-primary-light'
+  },
   {
     icon: TrendingUp,
-    label: 'LCTM 精准分型',
-    labelEn: 'LCTM Classification'
+    key: 'trajectory',
+    label: '轨迹解密',
+    labelEn: 'Trajectory Decryption',
+    desc: '多维生命体征 + GBTM 分型，AUC 0.91',
+    descEn: 'Multi-dimensional Vitals + GBTM Classification',
+    color: 'from-primary-light to-primary'
   },
   {
-    icon: Clock,
-    label: '超早期风险预测',
-    labelEn: 'Early Risk Prediction'
-  },
-  {
-    icon: Shield,
-    label: '联邦隐私合规',
-    labelEn: 'Federated Privacy'
-  },
-  {
-    icon: FileText,
-    label: 'LLM 循证方案',
-    labelEn: 'LLM Evidence-based'
+    icon: Network,
+    key: 'swarm',
+    label: '蜂群网络',
+    labelEn: 'Swarm Network',
+    desc: '边缘密算·数据不动模型动',
+    descEn: 'Edge Computing',
+    color: 'from-primary to-primary-light'
   }
 ];
 
 const dataHighlights = [
   {
-    value: '≥0.85',
-    label: '重症预测 AUC-ROC',
-    labelEn: 'Severe Prediction AUC-ROC'
+    value: '<5min',
+    label: '快速输出结果',
+    labelEn: 'Fast Results',
+    color: 'text-primary'
   },
   {
-    value: '≥15%',
-    label: '住院时间缩短',
-    labelEn: 'Hospital Stay Reduction'
+    value: '7X24h',
+    label: '动态监测病情',
+    labelEn: 'Dynamic Monitoring',
+    color: 'text-accent'
   },
   {
-    value: '≥20%',
-    label: '重症转化率降低',
-    labelEn: 'Severe Conversion Reduction'
+    value: '>90%',
+    label: '重识别率',
+    labelEn: 'Recognition Rate',
+    color: 'text-primary-light'
+  },
+  {
+    value: '0.878',
+    label: '模型AUC值',
+    labelEn: 'Model AUC',
+    color: 'text-accent'
   }
 ];
 
 export default function HeroSection({ lang }: HeroSectionProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [hoveredCapability, setHoveredCapability] = useState<number | null>(null);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -83,194 +102,161 @@ export default function HeroSection({ lang }: HeroSectionProps) {
   };
 
   return (
-    <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-gradient-to-br from-medical-blue-50 via-white to-blue-100">
-      {/* Background Decorations */}
+    <section className="relative pt-20 pb-16 md:pt-28 md:pb-20 overflow-hidden">
+      {/* 背景渐变 - 参考图片的浅蓝白到深蓝渐变 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-bg-primary via-white to-bg-secondary"></div>
+
+      {/* 装饰性光晕 */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-medical-blue-100 rounded-full opacity-30 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-light/5 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column - Content (55%) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Title System */}
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-medical-blue-100 text-medical-blue-dark px-4 py-2 rounded-full text-sm font-semibold animate-fade-in">
-                <Zap size={16} />
-                <span>{lang === 'zh' ? '新一代临床智能 AI' : 'Next-Gen Clinical AI'}</span>
+          <div className="lg:col-span-7 space-y-8">
+            <div className="space-y-6">
+              <div className={`transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="inline-flex items-center gap-2 bg-primary-bg backdrop-blur-sm border border-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium">
+                  <span className="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
+                  <span>{lang === 'zh' ? '全球首款急性胰腺炎无创评估智能体' : 'World\'s First Non-invasive AP Assessment AI'}</span>
+                </div>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-deep-blue leading-tight animate-slide-up">
-                {lang === 'zh' ? '急性胰腺炎异质性分型及早期预测诊疗 Agent' : 'AP Heterogeneity Classification & Early Prediction Agent'}
-              </h1>
-              <p className="text-base text-gray-600 leading-relaxed-plus max-w-2xl animate-fade-in">
-                {lang === 'zh'
-                  ? '国内首个基于动态心率轨迹 LCTM 分型的 AP 专属诊疗 Agent，融合联邦学习、面部炎症识别与医学大模型，实现「早期分层 - 风险预警 - 循证施治」全流程个性化诊疗。'
-                  : 'China\'s first AP diagnostic agent based on dynamic heart rate trajectory LCTM classification, integrating federated learning, facial inflammation recognition, and medical LLM for personalized diagnosis.'}
-              </p>
+
+              <div className={`transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-none tracking-tight">
+                  <span className="text-primary">Pancrea</span><span className="text-accent">Scan</span><span className="text-primary">-AI</span>
+                  <span className="block text-xl sm:text-2xl lg:text-3xl font-light text-primary-light mt-3 tracking-normal">
+                    {lang === 'zh' ? '急性胰腺炎无创评估智能体' : 'Non-invasive AP Assessment Agent'}
+                  </span>
+                </h1>
+              </div>
+
+              <div className={`transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <p className="text-base text-text-secondary leading-relaxed max-w-xl">
+                  {lang === 'zh'
+                    ? '以"AP特征面+轨迹解密+蜂群网络"三大核心技术融合，实现超早期分层、实时预警、个性化推荐、跨院隐私协同，破解急性胰腺炎诊疗瓶颈。'
+                    : 'Integrating "AP Facial Features + Trajectory Decryption + Swarm Network" core technologies for early stratification, real-time warning, personalized recommendations.'}
+                </p>
+              </div>
             </div>
 
-            {/* Core Data Highlights */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               {dataHighlights.map((item, index) => (
                 <div
                   key={index}
-                  className="relative group"
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-accent/20 shadow-soft"
                 >
-                  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-soft hover:shadow-medium transition-all duration-300 border border-medical-blue-100 hover:-translate-y-1">
-                    <div className="text-2xl sm:text-3xl font-bold text-medical-blue mb-1">
-                      {item.value}
-                    </div>
-                    <div className="text-xs text-gray-700 font-semibold">
-                      {lang === 'zh' ? item.label : item.labelEn}
-                    </div>
+                  <div className={`text-2xl sm:text-3xl font-bold ${item.color} mb-1`}>
+                    {item.value}
+                  </div>
+                  <div className="text-xs text-primary/60 font-medium">
+                    {lang === 'zh' ? item.label : item.labelEn}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Core Capabilities */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-3">
-              {coreCapabilities.map((capability, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-center p-3 rounded-lg hover:bg-medical-blue-50 transition-all cursor-pointer group"
-                  onMouseEnter={() => setHoveredCapability(index)}
-                  onMouseLeave={() => setHoveredCapability(null)}
-                >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 transition-all ${
-                    hoveredCapability === index 
-                      ? 'bg-medical-blue text-white' 
-                      : 'bg-medical-blue-100 text-medical-blue'
-                  }`}>
-                    <capability.icon size={20} strokeWidth={hoveredCapability === index ? 2.5 : 2} />
+            <div className={`space-y-3 transition-all duration-700 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <h3 className="text-sm font-semibold text-primary/70 uppercase tracking-wider">
+                {lang === 'zh' ? '三大核心技术' : 'Three Core Technologies'}
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                {threeCoreTech.map((tech) => (
+                  <div
+                    key={tech.key}
+                    className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-accent/20 hover:border-accent/40 hover:shadow-medium transition-all cursor-pointer"
+                  >
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tech.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                      <tech.icon className="text-white" size={18} />
+                    </div>
+                    <h4 className="text-sm font-semibold text-primary mb-1">{tech.label}</h4>
+                    <p className="text-xs text-primary/60 leading-tight">{tech.desc}</p>
                   </div>
-                  <div className={`text-xs font-semibold transition-all ${
-                    hoveredCapability === index ? 'text-medical-blue' : 'text-gray-700'
-                  }`}>
-                    {lang === 'zh' ? capability.label : capability.labelEn}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                className="group bg-gradient-to-r from-medical-blue to-medical-blue-light text-white px-6 py-3 rounded-lg font-semibold text-base hover:shadow-large transition-all duration-300 hover:-translate-y-1 flex items-center justify-center"
+            <div className={`flex flex-wrap gap-4 transition-all duration-700 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <button 
                 onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <Activity size={18} className="mr-2" />
-                {lang === 'zh' ? '产品演示' : 'Product Demo'}
-                <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                className="bg-gradient-to-r from-primary to-primary-light text-white px-8 py-3.5 rounded-full font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center gap-2">
+                {lang === 'zh' ? '申请试用' : 'Request Demo'}
+                <ArrowRight size={18} />
               </button>
               <button
-                className="bg-white text-medical-blue px-6 py-3 rounded-lg font-semibold text-base border-2 border-medical-blue hover:bg-medical-blue-50 transition-all duration-300 shadow-soft hover:shadow-medium flex items-center justify-center"
                 onClick={handleDownloadWhitepaper}
+                className="bg-white/80 backdrop-blur-sm text-primary px-8 py-3.5 rounded-full font-semibold hover:bg-white transition-all flex items-center gap-2 border border-accent/20 shadow-soft"
               >
-                <Download size={18} className="mr-2" />
-                {lang === 'zh' ? '项目白皮书' : 'Whitepaper'}
+                <Download size={18} />
+                {lang === 'zh' ? '下载白皮书' : 'Whitepaper'}
               </button>
             </div>
           </div>
 
-          {/* Right Column - Visual KV (45%) */}
           <div className="lg:col-span-5 relative">
-            <div className="relative h-[500px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden shadow-2xl">
-              {/* Dynamic Albumin Trajectory Curves */}
-              <div className="absolute inset-0 p-4">
-                <ResponsiveContainer width="100%" height="60%">
+            <div className={`relative transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+              <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-accent/20 shadow-medium">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-accent rounded-full animate-pulse"></div>
+                    <span className="text-sm text-primary font-medium">{lang === 'zh' ? '实时监测中' : 'Monitoring'}</span>
+                  </div>
+                  <span className="text-xs text-primary/50">72h {lang === 'zh' ? '心率轨迹' : 'HR Trajectory'}</span>
+                </div>
+
+                <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={trajectoryData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="time" stroke="#666" fontSize={11} />
-                    <YAxis stroke="#666" fontSize={11} domain={[20, 45]} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '8px' }}
-                      labelStyle={{ color: '#333', fontWeight: 'bold' }}
+                    <defs>
+                      <linearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e6f2ff" />
+                    <XAxis dataKey="time" stroke="#0A2540" fontSize={12} />
+                    <YAxis stroke="#0A2540" fontSize={12} domain={[20, 45]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        borderRadius: '12px',
+                        color: '#0A2540',
+                        backdropFilter: 'blur(10px)'
+                      }}
+                      labelStyle={{ color: '#0A2540' }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#DC3545" 
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#3b82f6"
                       strokeWidth={3}
-                      dot={{ fill: '#DC3545', strokeWidth: 2, r: 5 }}
-                      activeDot={{ r: 7 }}
-                      className={isLoaded ? 'animate-draw' : ''}
+                      dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, fill: '#3b82f6' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
 
-                {/* Workflow Diagram */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white to-transparent">
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { icon: Activity, label: lang === 'zh' ? '数据输入' : 'Data Input' },
-                      { icon: TrendingUp, label: lang === 'zh' ? 'LCTM 分型' : 'LCTM' },
-                      { icon: Clock, label: lang === 'zh' ? '风险预测' : 'Prediction' },
-                      { icon: FileText, label: lang === 'zh' ? '循证方案' : 'Treatment' }
-                    ].map((step, index) => (
-                      <div key={index} className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-1 transition-all ${
-                          isLoaded ? 'bg-medical-blue text-white' : 'bg-gray-300 text-gray-500'
-                        }`}>
-                          <step.icon size={16} />
-                        </div>
-                        <div className="text-xs text-gray-600 font-medium text-center">{step.label}</div>
-                      </div>
-                    ))}
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <div className="bg-highlight/10 border border-highlight/30 rounded-xl p-3 text-center">
+                    <div className="text-highlight font-bold text-lg">{lang === 'zh' ? '高危' : 'High'}</div>
+                    <div className="text-xs text-highlight/80">HR &gt; 120bpm</div>
+                  </div>
+                  <div className="bg-accent/10 border border-accent/30 rounded-xl p-3 text-center">
+                    <div className="text-accent font-bold text-lg">{lang === 'zh' ? '稳定' : 'Stable'}</div>
+                    <div className="text-xs text-accent/80">HR &lt; 100bpm</div>
                   </div>
                 </div>
               </div>
 
-              {/* Decorative Elements */}
-              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-lg shadow-sm">
-                <div className="text-xs text-gray-500">{lang === 'zh' ? '动态心率轨迹' : 'Dynamic Heart Rate Trajectory'}</div>
-                <div className="text-xs font-bold text-medical-blue">72h Monitoring</div>
+              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-primary to-primary-light text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                {lang === 'zh' ? '1分钟内完成分型' : '1min Classification'}
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes draw {
-          from {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-          }
-          to {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 0;
-          }
-        }
-        .animate-draw {
-          animation: draw 2s ease-out forwards;
-        }
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-        @keyframes slide-up {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.5s ease-out;
-        }
-      `}</style>
     </section>
   );
 }

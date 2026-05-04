@@ -1,720 +1,449 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Camera, 
-  Activity, 
-  Download, 
-  Printer, 
-  Search, 
-  Plus,
-  CheckCircle,
-  XCircle,
-  FileText,
+import React, { useState } from 'react';
+import Image from 'next/image';
+import {
+  Activity,
+  Heart,
   Brain,
-  TrendingUp,
+  FileText,
+  Download,
+  Printer,
   AlertTriangle,
-  ClipboardList,
+  CheckCircle,
+  Clock,
+  ArrowRight,
+  Upload,
   Eye,
-  X
+  TrendingUp,
+  Users,
+  Camera,
+  Hospital,
+  Search,
+  Monitor,
+  Stethoscope,
+  Shield,
+  ChevronDown,
+  X,
+  CheckCircle2,
+  ScanFace
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine
+} from 'recharts';
 
 interface ProductDemoProps {
   lang: 'en' | 'zh';
 }
 
-interface HospitalSystem {
-  id: number;
-  name: string;
-  type: 'HIS' | 'EMR' | 'PACS';
-  connected: boolean;
-}
-
-interface Patient {
-  id: number;
-  name: string;
-  type: string;
-  riskLevel: 'high' | 'medium' | 'low';
-  data: PatientData;
-}
-
-interface PatientData {
-  basicInfo: {
-    name: string;
-    gender: string;
-    age: string;
-    admissionTime: string;
-    cause: string;
-    vitalSigns: string;
-  };
-  heartRateData: number[];
-  trajectoryType: string;
-  riskLevel: string;
-  riskProbability: number;
-  treatmentPlan: string[];
-  monitoringPlan: string[];
-}
-
-const hospitalSystems: HospitalSystem[] = [
-  { id: 1, name: '北京协和医院', type: 'HIS', connected: true },
-  { id: 2, name: '上海瑞金医院', type: 'EMR', connected: false },
-  { id: 3, name: '华西医院', type: 'PACS', connected: false },
+const sampleTrajectoryData = [
+  { time: '入院时', hr: 85 },
+  { time: '6h', hr: 95 },
+  { time: '12h', hr: 105 },
+  { time: '24h', hr: 115 },
+  { time: '48h', hr: 125 },
+  { time: '72h', hr: 130 },
 ];
 
-const patients: Patient[] = [
-  {
-    id: 1,
-    name: '张三',
-    type: '快速下降 - 持续低蛋白型',
-    riskLevel: 'high',
-    data: {
-      basicInfo: {
-        name: '张三',
-        gender: '男',
-        age: '68 岁',
-        admissionTime: '2024-01-15 08:30',
-        cause: '胆源性',
-        vitalSigns: 'T 38.5℃, P 105 次/分，R 22 次/分，BP 95/60mmHg'
-      },
-      heartRateData: [85, 95, 105, 115, 125, 130],
-      trajectoryType: '快速上升 - 持续心动过速型',
-      riskLevel: '极高危',
-      riskProbability: 0.87,
-      treatmentPlan: [
-        '液体治疗：立即启动目标导向液体治疗（GDFT），晶体液 500ml 快速输注',
-        '营养支持：早期肠内营养（24-48h 内），鼻空肠管喂养',
-        '药物治疗：乌司他汀 20 万 U bid + 生长抑素持续泵入',
-        '并发症防治：预防性抗生素（头孢曲松 2g qd），密切监测腹腔间隔室综合征'
-      ],
-      monitoringPlan: [
-        '每 2 小时监测生命体征、尿量',
-        '每 6 小时复查血常规、生化、血气分析',
-        '每日床旁超声评估腹腔积液',
-        '预警指标：MAP<65mmHg、尿量<0.5ml/kg/h、乳酸>2mmol/L'
-      ]
-    }
-  },
-  {
-    id: 2,
-    name: '李四',
-    type: '缓慢下降 - 延迟回升型',
-    riskLevel: 'medium',
-    data: {
-      basicInfo: {
-        name: '李四',
-        gender: '女',
-        age: '55 岁',
-        admissionTime: '2024-01-16 10:15',
-        cause: '高脂血症性',
-        vitalSigns: 'T 37.8℃, P 92 次/分，R 20 次/分，BP 110/70mmHg'
-      },
-      heartRateData: [85, 88, 95, 100, 95, 90],
-      trajectoryType: '缓慢上升 - 延迟回落型',
-      riskLevel: '中危',
-      riskProbability: 0.45,
-      treatmentPlan: [
-        '液体治疗：平衡盐溶液维持，根据 CVP 调整输液速度',
-        '营养支持：48h 后启动肠内营养，低脂配方',
-        '药物治疗：乌司他汀 10 万 U bid + 胰岛素控制血糖',
-        '并发症防治：血脂净化治疗，监测肝功能'
-      ],
-      monitoringPlan: [
-        '每 4 小时监测生命体征',
-        '每 12 小时复查血常规、生化',
-        '每日监测血脂、肝功能',
-        '预警指标：WBC>16×10⁹/L、Cr 进行性升高'
-      ]
-    }
-  },
-  {
-    id: 3,
-    name: '王五',
-    type: '稳定 - 快速回升型',
-    riskLevel: 'low',
-    data: {
-      basicInfo: {
-        name: '王五',
-        gender: '男',
-        age: '42 岁',
-        admissionTime: '2024-01-17 14:20',
-        cause: '酒精性',
-        vitalSigns: 'T 37.2℃, P 85 次/分，R 18 次/分，BP 125/80mmHg'
-      },
-      heartRateData: [85, 82, 80, 78, 75, 72],
-      trajectoryType: '稳定 - 快速回落型',
-      riskLevel: '低危',
-      riskProbability: 0.12,
-      treatmentPlan: [
-        '液体治疗：口服补液为主，静脉补液为辅',
-        '营养支持：24h 后恢复经口进食，低脂流质',
-        '药物治疗：PPI 抑酸 + 补充电解质',
-        '并发症防治：戒酒教育，监测血糖'
-      ],
-      monitoringPlan: [
-        '每 8 小时监测生命体征',
-        '每日复查血常规、生化',
-        '3 天后复查腹部超声',
-        '预警指标：腹痛加重、发热>38.5℃'
-      ]
-    }
+const hospitals = [
+  { name: '南昌大学第一附属医院', system: 'HIS 系统', connected: true },
+  { name: '南昌市高新区人民医院', system: 'EMR 系统', connected: false },
+  { name: '广州市第一人民医院', system: 'PACS 系统', connected: false },
+];
+
+const patients = [
+  { name: '张三', subtype: 'T4型低升型', risk: 'high' },
+  { name: '李四', subtype: 'T3型中高波动型', risk: 'medium' },
+  { name: '王五', subtype: 'T1型低稳定型', risk: 'low' },
+];
+
+const sampleReport = {
+  patient: { name: '张三', age: '68岁', gender: '男', id: 'AP-2024-001' },
+  admitTime: '2024-01-15 08:30',
+  cause: '胆源性',
+  vitals: 'T 38.5°C, P 105 次/分, R 22 次/分, BP 95/60mmHg',
+  subtype: 'T4型低升型',
+  severity: '极高危',
+  riskScore: 0.87,
+  riskLevel: '重症SAP',
+  recommendations: [
+    { title: '液体治疗', content: '立即启动目标导向液体治疗（GDFT），晶体液500ml快速输注', guide: '2024 ACG 急性胰腺炎指南 #3.1' },
+    { title: '营养支持', content: '早期肠内营养（24-48h内），鼻空肠管喂养', guide: '2024 ACG 急性胰腺炎指南 #3.2' },
+    { title: '药物治疗', content: '乌司他丁 20万U bid + 生长抑素持续泵入', guide: '2024 ACG 急性胰腺炎指南 #3.3' },
+    { title: '并发症防治', content: '预防性抗生素（头孢曲松 2g qd），密切监测腹腔间隔室综合征', guide: '2024 ACG 急性胰腺炎指南 #3.4' }
+  ],
+  monitoring: [
+    '每2小时监测生命体征、尿量',
+    '每6小时复查血常规、生化、血气分析',
+    '每日床旁超声评估腹腔积液',
+    '预警指标：MAP<65mmHg、尿量<0.5ml/kg/h、乳酸>2mmol/L'
+  ],
+  outcomes: {
+    hospitalStay: '-2.3天',
+    cost: '-25.6%',
+    mortality: '-38.2%'
   }
-];
-
-const heartRateTimePoints = ['入院时', '6h', '12h', '24h', '48h', '72h'];
+};
 
 export default function ProductDemo({ lang }: ProductDemoProps) {
-  const [selectedHospital, setSelectedHospital] = useState<HospitalSystem | null>(null);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [heartRateInput, setHeartRateInput] = useState<string>('');
-  const [heartRateData, setHeartRateData] = useState<number[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [showDataModal, setShowDataModal] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
-  const [heartRateRange, setHeartRateRange] = useState('60-100');
+  const [showReport, setShowReport] = useState(false);
+  const [heartRateInput, setHeartRateInput] = useState('85, 95, 105, 115, 125, 130');
 
-  const pullRecordBtnRef = useRef<HTMLButtonElement>(null);
-  const analyzeBtnRef = useRef<HTMLButtonElement>(null);
-  const reportSectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTutorial(true);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handlePullRecords = (hospital: HospitalSystem) => {
-    setSelectedHospital(hospital);
-    setSelectedPatient(patients[0]);
-    setHeartRateData(patients[0].data.heartRateData);
-    setHeartRateInput(patients[0].data.heartRateData.join(', '));
-  };
-
-  const handleSelectPatient = (patient: Patient) => {
-    setSelectedPatient(patient);
-    setHeartRateData(patient.data.heartRateData);
-    setHeartRateInput(patient.data.heartRateData.join(', '));
-  };
-
-  const handlePhotoUpload = () => {
-    setUploadedPhoto('/example-face.jpg');
-    setShowPhotoModal(false);
-  };
-
-  const handleDataUpload = (exampleData: number[]) => {
-    setHeartRateData(exampleData);
-    setHeartRateInput(exampleData.join(', '));
-    setShowDataModal(false);
-  };
-
-  const handleManualInput = (value: string) => {
-    setHeartRateInput(value);
-    const values = value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-    if (values.length > 0) {
-      setHeartRateData(values);
-    }
-  };
+  const trajectoryData = sampleTrajectoryData.map((d, i) => ({
+    ...d,
+    hr: parseInt(heartRateInput.split(',')[i]?.trim()) || d.hr
+  }));
 
   const handleAnalyze = () => {
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
-      setAnalysisComplete(true);
+      setShowReport(true);
     }, 2000);
   };
 
-  const handleDownloadReport = () => {
-    alert(`正在下载：PancreaAgent-AI_诊断报告_${selectedPatient?.data.basicInfo.name || '患者'}.pdf`);
+  const handleReset = () => {
+    setShowReport(false);
+    setHeartRateInput('85, 95, 105, 115, 125, 130');
   };
 
-  const handlePrintReport = () => {
-    window.print();
-  };
-
-  const nextTutorialStep = () => {
-    if (tutorialStep < 2) {
-      setTutorialStep(tutorialStep + 1);
-    } else {
-      setShowTutorial(false);
-    }
-  };
-
-  const getTutorialHighlight = () => {
-    switch (tutorialStep) {
-      case 0:
-        return pullRecordBtnRef.current?.getBoundingClientRect() || { top: 0, left: 0, width: 0, height: 0 };
-      case 1:
-        return analyzeBtnRef.current?.getBoundingClientRect() || { top: 0, left: 0, width: 0, height: 0 };
-      case 2:
-        return reportSectionRef.current?.getBoundingClientRect() || { top: 0, left: 0, width: 0, height: 0 };
+  const getRiskBadge = (risk: string) => {
+    switch (risk) {
+      case 'high':
+        return <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-xs rounded-full">{lang === 'zh' ? '高危' : 'High'}</span>;
+      case 'medium':
+        return <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-xs rounded-full">{lang === 'zh' ? '中危' : 'Medium'}</span>;
+      case 'low':
+        return <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-xs rounded-full">{lang === 'zh' ? '低危' : 'Low'}</span>;
       default:
-        return { top: 0, left: 0, width: 0, height: 0 };
-    }
-  };
-
-  const getTutorialContent = () => {
-    switch (tutorialStep) {
-      case 0:
-        return {
-          title: '第一步：拉取病历',
-          description: '点击左侧「拉取病历」按钮，获取预设患者病历数据',
-          position: 'left'
-        };
-      case 1:
-        return {
-          title: '第二步：执行分析',
-          description: '点击中间「执行分析」按钮，AI 将自动完成分型与风险预测',
-          position: 'center'
-        };
-      case 2:
-        return {
-          title: '第三步：查看报告',
-          description: '右侧将展示完整的结构化诊断报告与循证治疗方案',
-          position: 'right'
-        };
-      default:
-        return { title: '', description: '', position: 'center' };
-    }
-  };
-
-  const generateChartData = () => {
-    return heartRateData.map((value, index) => ({
-      time: heartRateTimePoints[index] || `${index * 6}h`,
-      value: value
-    }));
-  };
-
-  const getRiskColor = (level: string) => {
-    switch (level) {
-      case '极高危': return 'text-[#C76B6B] bg-[#F5E6E6]';
-      case '高危': return 'text-[#D4A574] bg-[#FDF5EE]';
-      case '中危': return 'text-[#9DB4C0] bg-[#F0F4F5]';
-      case '低危': return 'text-[#7DAF9C] bg-[#EDF5F1]';
-      default: return 'text-gray-600 bg-gray-50';
+        return null;
     }
   };
 
   return (
-    <section id="product-demo" className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 标题区域 */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-[#0066CC] mb-4">
-            1:1 还原临床操作界面，沉浸式体验全流程诊疗辅助
+    <section id="demo" className="py-20 md:py-28 bg-gradient-to-b from-bg-primary to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+            {lang === 'zh' ? '临床诊疗界面' : 'Clinical Interface'}
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-            模拟临床医生真实工作流，无需部署即可体验从病历对接、数据分析到报告生成的完整功能
+          <p className="text-base text-text-secondary max-w-2xl mx-auto">
+            {lang === 'zh'
+              ? 'PancreaScan-AI 临床智能诊疗系统 V1.0'
+              : 'PancreaScan-AI Clinical Intelligent Diagnosis System V1.0'}
           </p>
         </div>
 
-        {/* 核心功能说明 */}
-        <div className="bg-white rounded-2xl shadow-soft p-8 mb-12">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-[#0066CC]/10 rounded-lg">
-              <Activity className="w-8 h-8 text-[#0066CC]" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">核心功能说明</h3>
-              <p className="text-gray-600 leading-relaxed">
-                本演示界面完整还原 <span className="font-semibold text-[#0066CC]">PancreaAgent-AI™</span> 的临床应用工作台，支持医院 HIS/EMR/PACS 系统对接、多模态数据上传、自动化分型分析、循证诊断报告生成四大核心能力，让您直观感受产品如何融入真实临床工作流，提升诊疗效率与精准度。
-              </p>
+        <div className="bg-white rounded-2xl shadow-xl border border-accent/20 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary to-primary-light px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Activity className="w-6 h-6 text-white" />
+                <div>
+                  <span className="text-white font-bold text-lg">PancreaScan-AI</span>
+                  <span className="text-white/70 text-sm ml-2">V1.0</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="bg-accent hover:bg-primary-light text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                  <span className="text-lg">+</span>
+                  {lang === 'zh' ? '连接系统' : 'Connect System'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 三栏式布局 */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-          {/* 左侧栏：医院病历系统 - 30% */}
-          <div className="lg:col-span-3 bg-white rounded-2xl shadow-soft overflow-hidden">
-            {/* 品牌标识 */}
-            <div className="bg-gradient-to-r from-[#0066CC] to-[#004C99] p-6 text-white text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Activity className="w-6 h-6" />
-                <span className="text-lg font-bold">PancreaAgent-AI™</span>
-              </div>
-              <p className="text-sm opacity-90">V1.0</p>
-            </div>
-
-            {/* 核心功能区 */}
-            <div className="p-6 space-y-4">
-              <button
-                ref={pullRecordBtnRef}
-                className="w-full bg-[#0066CC] hover:bg-[#004C99] text-white py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
-                onClick={() => handlePullRecords(hospitalSystems[0])}
-              >
-                <Plus className="w-5 h-5" />
-                连接系统
-              </button>
-
-              <div className="space-y-3">
-                {hospitalSystems.map((hospital) => (
-                  <div
-                    key={hospital.id}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      selectedHospital?.id === hospital.id
-                        ? 'border-[#0066CC] bg-[#E6F2FF]'
-                        : 'border-gray-200 hover:border-[#0066CC]/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{hospital.name}</h4>
-                        <p className="text-sm text-gray-500">{hospital.type} 系统</p>
-                      </div>
+          <div className="grid lg:grid-cols-12 gap-0">
+            {/* Left Panel - Hospital Connections & Patient List */}
+            <div className="lg:col-span-3 border-r border-accent/20 bg-bg-primary p-4">
+              <div className="space-y-3 mb-6">
+                {hospitals.map((hospital, index) => (
+                  <div key={index} className={`rounded-xl p-3 border ${hospital.connected ? 'bg-accent/10 border-accent/30' : 'bg-white border-accent/10'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-primary">{hospital.name}</span>
                       {hospital.connected ? (
-                        <CheckCircle className="w-5 h-5 text-[#7DAF9C]" />
+                        <CheckCircle2 className="w-4 h-4 text-accent" />
                       ) : (
-                        <XCircle className="w-5 h-5 text-gray-400" />
+                        <X className="w-4 h-4 text-primary/30" />
                       )}
                     </div>
-                    <div className="text-sm mb-2">
-                      <span className={`px-2 py-1 rounded ${
-                        hospital.connected ? 'bg-[#EDF5F1] text-[#7DAF9C]' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {hospital.connected ? '已连接' : '未连接'}
-                      </span>
-                    </div>
-                    {hospital.connected ? (
-                      <button
-                        className="w-full bg-[#0066CC] hover:bg-[#004C99] text-white py-2 px-3 rounded text-sm transition-all"
-                        onClick={() => handlePullRecords(hospital)}
-                      >
-                        拉取病历
-                      </button>
-                    ) : (
-                      <button className="w-full bg-gray-200 hover:bg-gray-300 text-gray-600 py-2 px-3 rounded text-sm transition-all">
-                        连接
-                      </button>
-                    )}
+                    <div className="text-xs text-primary/60 mb-2">{hospital.system}</div>
+                    <div className="text-xs text-accent mb-2">{hospital.connected ? (lang === 'zh' ? '已连接' : 'Connected') : (lang === 'zh' ? '未连接' : 'Not Connected')}</div>
+                    <button className={`w-full py-1.5 rounded-lg text-xs font-medium transition-colors ${hospital.connected ? 'bg-accent text-white hover:bg-primary' : 'bg-bg-secondary text-primary/60 hover:bg-accent/10'}`}>
+                      {hospital.connected ? (lang === 'zh' ? '获取病历' : 'Get Records') : (lang === 'zh' ? '连接' : 'Connect')}
+                    </button>
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* 底部功能区 */}
-            <div className="p-6 border-t border-gray-200 space-y-4">
-              <div className="relative">
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
                 <input
                   type="text"
-                  placeholder="输入患者姓名/ID 搜索"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
+                  placeholder={lang === 'zh' ? '输入患者姓名/ID 搜索' : 'Search patient name/ID'}
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-accent/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
                 />
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
 
               <div className="space-y-2">
-                {patients.map((patient) => (
+                {patients.map((patient, index) => (
                   <div
-                    key={patient.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
-                      selectedPatient?.id === patient.id
-                        ? 'bg-[#E6F2FF] border-2 border-[#0066CC]'
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                    }`}
-                    onClick={() => handleSelectPatient(patient)}
+                    key={index}
+                    className={`rounded-lg p-3 cursor-pointer transition-colors ${index === 0 ? 'bg-accent/10 border border-accent/30' : 'bg-white border border-accent/10 hover:bg-accent/5'}`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{patient.name}</p>
-                        <p className="text-xs text-gray-500">{patient.type}</p>
+                        <div className="text-sm font-semibold text-primary">{patient.name}</div>
+                        <div className="text-xs text-primary/60">{patient.subtype}</div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        patient.riskLevel === 'high' ? 'bg-[#F5E6E6] text-[#C76B6B]' :
-                        patient.riskLevel === 'medium' ? 'bg-[#F0F4F5] text-[#9DB4C0]' :
-                        'bg-[#EDF5F1] text-[#7DAF9C]'
-                      }`}>
-                        {patient.riskLevel === 'high' ? '高危' :
-                         patient.riskLevel === 'medium' ? '中危' : '低危'}
-                      </span>
+                      {getRiskBadge(patient.risk)}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* 中间栏：核心分析工具 - 40% */}
-          <div className="lg:col-span-4 bg-white rounded-2xl shadow-soft overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-[#0066CC] mb-2">分析工具</h3>
-              <div className="h-1 w-20 bg-[#0066CC]/20 rounded"></div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* 面部分析 */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-[#0066CC]" />
-                  面部分析
-                </h4>
-                {uploadedPhoto ? (
-                  <div className="border-2 border-dashed border-[#0066CC] rounded-lg p-6 text-center bg-[#E6F2FF]">
-                    <div className="w-32 h-32 mx-auto bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
-                      <Camera className="w-12 h-12 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">已上传面部照片</p>
-                    <button
-                      className="text-[#0066CC] hover:underline text-sm"
-                      onClick={() => setShowPhotoModal(true)}
-                    >
-                      重新选择
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#0066CC] transition-colors cursor-pointer"
-                    onClick={() => setShowPhotoModal(true)}
-                  >
-                    <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600 mb-3">上传面部照片</p>
-                    <button className="bg-[#0066CC] hover:bg-[#004C99] text-white py-2 px-6 rounded-lg transition-all">
-                      上传照片
-                    </button>
-                  </div>
-                )}
+            {/* Middle Panel - Analysis Tools */}
+            <div className="lg:col-span-5 p-6">
+              <div className="mb-6">
+                <h3 className="text-base font-bold text-primary mb-4 flex items-center gap-2">
+                  <span className="w-8 h-0.5 bg-accent"></span>
+                  {lang === 'zh' ? '分析工具' : 'Analysis Tools'}
+                </h3>
               </div>
 
-              {/* 心率动态轨迹分析 */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-[#0066CC]" />
-                  心率动态轨迹分析
+              {/* Facial Analysis */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-primary/80 mb-3 flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-accent" />
+                  {lang === 'zh' ? '面部分析' : 'Facial Analysis'}
                 </h4>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      心率参考范围（bpm）
-                    </label>
-                    <input
-                      type="text"
-                      value={heartRateRange}
-                      onChange={(e) => setHeartRateRange(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
-                    />
+                <div className="border-2 border-dashed border-accent/30 rounded-xl p-6 bg-accent/5 text-center">
+                  <div className="w-24 h-24 mx-auto bg-bg-secondary rounded-lg flex items-center justify-center mb-3">
+                    <Camera className="w-10 h-10 text-primary/30" />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      多时间点心率值输入框
-                    </label>
-                    <textarea
-                      value={heartRateInput}
-                      onChange={(e) => handleManualInput(e.target.value)}
-                      placeholder="入院时/6h/12h/24h/48h/72h 心率值（按时间顺序输入，用逗号分隔）"
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]"
-                    />
-                  </div>
-
-                  {heartRateData.length > 0 && (
-                    <div className="bg-[#E6F2FF] rounded-lg p-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">轨迹预览</p>
-                      <div className="h-40">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={generateChartData()}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ddd" />
-                            <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-                            <YAxis domain={[20, 50]} tick={{ fontSize: 12 }} />
-                            <Tooltip />
-                            <ReferenceLine y={35} stroke="#999" strokeDasharray="3 3" />
-                            <ReferenceLine y={55} stroke="#999" strokeDasharray="3 3" />
-                            <Line
-                              type="monotone"
-                              dataKey="value"
-                              stroke="#0066CC"
-                              strokeWidth={2}
-                              dot={{ fill: '#0066CC', r: 4 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 心率轨迹数据上传 */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-[#0066CC]" />
-                  心率轨迹数据上传
-                </h4>
-                <div
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#0066CC] transition-colors cursor-pointer"
-                  onClick={() => setShowDataModal(true)}
-                >
-                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600 mb-3">上传轨迹数据</p>
-                  <button className="bg-[#0066CC] hover:bg-[#004C99] text-white py-2 px-6 rounded-lg transition-all">
-                    上传轨迹数据
+                  <div className="text-sm text-primary/70 mb-2">{lang === 'zh' ? '已上传面部图片' : 'Face image uploaded'}</div>
+                  <button className="text-accent text-xs font-medium hover:underline">
+                    {lang === 'zh' ? '重新选择' : 'Re-select'}
                   </button>
                 </div>
               </div>
 
-              {/* 执行分析按钮 */}
+              {/* Heart Rate Trajectory Analysis */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-primary/80 mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-accent" />
+                  {lang === 'zh' ? '心率动态轨迹分析' : 'Heart Rate Dynamic Trajectory Analysis'}
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-primary/60 mb-1 block">{lang === 'zh' ? '心率参考范围（bpm）' : 'HR Reference Range (bpm)'}</label>
+                    <input
+                      type="text"
+                      defaultValue="60-100"
+                      className="w-full px-3 py-2 border border-accent/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-primary/60 mb-1 block">{lang === 'zh' ? '多时间点心率值输入框' : 'Multi-timepoint HR Values'}</label>
+                    <textarea
+                      value={heartRateInput}
+                      onChange={(e) => setHeartRateInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-accent/20 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Trajectory Preview */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-primary/80 mb-3">{lang === 'zh' ? '轨迹预览' : 'Trajectory Preview'}</h4>
+                <div className="bg-bg-secondary rounded-xl p-4">
+                  <ResponsiveContainer width="100%" height={140}>
+                    <LineChart data={trajectoryData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e6f2ff" />
+                      <XAxis dataKey="time" stroke="#0A2540" fontSize={10} />
+                      <YAxis stroke="#0A2540" fontSize={10} domain={[20, 130]} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e6f2ff',
+                          borderRadius: '8px',
+                          fontSize: 12
+                        }}
+                      />
+                      <ReferenceLine y={100} stroke="#F59E0B" strokeDasharray="5 5" />
+                      <Line type="monotone" dataKey="hr" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4, fill: '#3B82F6' }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Upload Face Photo */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-primary/80 mb-3 flex items-center gap-2">
+                  <ScanFace className="w-4 h-4 text-accent" />
+                  {lang === 'zh' ? '人脸照片上传' : 'Face Photo Upload'}
+                </h4>
+                <div className="border-2 border-dashed border-accent/30 rounded-xl p-6 bg-accent/5 text-center">
+                  <ScanFace className="w-10 h-10 text-primary/30 mx-auto mb-2" />
+                  <div className="text-sm text-primary/70 mb-3">{lang === 'zh' ? '从病历系统抓取生命体征数据，仅需上传人脸照片即可完成分析' : 'Vital signs auto-collected from EMR, just upload face photo'}</div>
+                  <button className="bg-accent hover:bg-primary-light text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    {lang === 'zh' ? '上传人脸照片' : 'Upload Face Photo'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Execute Analysis Button */}
               <button
-                ref={analyzeBtnRef}
-                disabled={heartRateData.length === 0 || isAnalyzing}
                 onClick={handleAnalyze}
-                className={`w-full py-4 rounded-lg font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                  heartRateData.length === 0 || isAnalyzing
-                    ? 'bg-gray-300 cursor-not-allowed'
-                    : 'bg-[#0066CC] hover:bg-[#004C99] text-white shadow-medium'
-                }`}
+                disabled={isAnalyzing}
+                className="w-full bg-gradient-to-r from-primary to-primary-light text-white py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isAnalyzing ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    正在分析...
+                    <Activity className="w-5 h-5 animate-spin" />
+                    {lang === 'zh' ? '分析中...' : 'Analyzing...'}
                   </>
                 ) : (
                   <>
-                    <Brain className="w-6 h-6" />
-                    执行分析
+                    <Brain className="w-5 h-5" />
+                    {lang === 'zh' ? '执行分析' : 'Execute Analysis'}
                   </>
                 )}
               </button>
             </div>
-          </div>
 
-          {/* 右侧栏：诊断报告 - 30% */}
-          <div 
-            ref={reportSectionRef}
-            className="lg:col-span-3 bg-white rounded-2xl shadow-soft overflow-hidden"
-          >
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-[#0066CC]">诊断报告</h3>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleDownloadReport}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="下载报告"
-                >
-                  <Download className="w-5 h-5 text-gray-600" />
-                </button>
-                <button
-                  onClick={handlePrintReport}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="打印报告"
-                >
-                  <Printer className="w-5 h-5 text-gray-600" />
-                </button>
+            {/* Right Panel - Diagnosis Report */}
+            <div className="lg:col-span-4 border-l border-accent/20 bg-bg-primary p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-base font-bold text-primary">
+                  {lang === 'zh' ? '诊断报告' : 'Diagnosis Report'}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-primary/40 cursor-pointer hover:text-accent" />
+                  <Printer className="w-4 h-4 text-primary/40 cursor-pointer hover:text-accent" />
+                </div>
               </div>
-            </div>
 
-            <div className="p-6">
-              {!analysisComplete ? (
-                <div className="h-[600px] flex flex-col items-center justify-center text-gray-400">
-                  <Brain className="w-16 h-16 mb-4" />
-                  <p className="text-lg">请执行分析以生成诊断报告</p>
+              {!showReport ? (
+                <div className="text-center py-12 text-primary/30">
+                  <FileText className="w-16 h-16 mx-auto mb-4" />
+                  <p className="text-sm">{lang === 'zh' ? '点击"执行分析"生成报告' : 'Click "Execute Analysis" to generate report'}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* 1. 患者基本信息 */}
-                  <div className="bg-[#E6F2FF] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <ClipboardList className="w-5 h-5 text-[#0066CC]" />
-                      <h4 className="font-semibold text-gray-900">患者基本信息</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="text-gray-600">姓名：</span><span className="font-medium">{selectedPatient?.data.basicInfo.name}</span></p>
-                      <p><span className="text-gray-600">性别：</span><span className="font-medium">{selectedPatient?.data.basicInfo.gender}</span></p>
-                      <p><span className="text-gray-600">年龄：</span><span className="font-medium">{selectedPatient?.data.basicInfo.age}</span></p>
-                      <p><span className="text-gray-600">入院时间：</span><span className="font-medium">{selectedPatient?.data.basicInfo.admissionTime}</span></p>
-                      <p><span className="text-gray-600">病因：</span><span className="font-medium">{selectedPatient?.data.basicInfo.cause}</span></p>
-                      <p><span className="text-gray-600">生命体征：</span><span className="font-medium">{selectedPatient?.data.basicInfo.vitalSigns}</span></p>
+                  {/* Patient Basic Info */}
+                  <div className="bg-accent/10 rounded-xl p-4 border border-accent/20">
+                    <h4 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      {lang === 'zh' ? '患者基本信息' : 'Patient Info'}
+                    </h4>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '姓名' : 'Name'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.patient.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '性别' : 'Gender'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.patient.gender}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '年龄' : 'Age'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.patient.age}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '入院时间' : 'Admit Time'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.admitTime}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '病因' : 'Cause'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.cause}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-primary/60">{lang === 'zh' ? '生命体征' : 'Vitals'}:</span>
+                        <span className="text-primary font-medium">{sampleReport.vitals}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* 2. LCTM 心率轨迹亚型 */}
-                  <div className="bg-[#E6F2FF] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <TrendingUp className="w-5 h-5 text-[#0066CC]" />
-                      <h4 className="font-semibold text-gray-900">LCTM 心率轨迹亚型</h4>
-                    </div>
-                    <p className="font-medium text-gray-900 mb-2">{selectedPatient?.data.trajectoryType}</p>
-                    <div className="h-32 mb-2">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={generateChartData()}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#ddd" />
-                          <XAxis dataKey="time" tick={{ fontSize: 10 }} />
-                          <YAxis domain={[50, 150]} tick={{ fontSize: 10 }} />
-                          <Tooltip />
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke="#0066CC"
-                            strokeWidth={2}
-                            dot={{ fill: '#0066CC', r: 3 }}
-                          />
+                  {/* GBTM Subtype */}
+                  <div className="bg-accent/10 rounded-xl p-4 border border-accent/20">
+                    <h4 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4" />
+                      {lang === 'zh' ? 'GBTM 临床亚型' : 'GBTM Clinical Subtype'}
+                    </h4>
+                    <div className="text-sm font-medium text-primary mb-3">{sampleReport.subtype}</div>
+                    <div className="bg-white rounded-lg p-3">
+                      <ResponsiveContainer width="100%" height={100}>
+                        <LineChart data={trajectoryData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e6f2ff" />
+                          <XAxis dataKey="time" stroke="#0A2540" fontSize={9} />
+                          <YAxis stroke="#0A2540" fontSize={9} domain={[50, 150]} />
+                          <Line type="monotone" dataKey="hr" stroke="#3B82F6" strokeWidth={2} dot={{ r: 3, fill: '#3B82F6' }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      关键特征：入院 72 小时内心率呈{heartRateData[0] > heartRateData[heartRateData.length - 1] ? '下降' : '上升'}趋势，
-                      最低值{Math.min(...heartRateData)} bpm，最高值{Math.max(...heartRateData)} bpm
-                    </p>
-                  </div>
-
-                  {/* 3. 重症风险预测 */}
-                  <div className="bg-[#E6F2FF] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <AlertTriangle className="w-5 h-5 text-[#0066CC]" />
-                      <h4 className="font-semibold text-gray-900">重症风险预测</h4>
-                    </div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className={`px-3 py-1 rounded-full font-bold ${getRiskColor(selectedPatient?.data.riskLevel || '')}`}>
-                        {selectedPatient?.data.riskLevel}
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        预测概率：{(selectedPatient?.data.riskProbability || 0) * 100}%
-                      </span>
-                    </div>
-                    <div className="bg-white rounded p-3">
-                      <p className="text-sm font-medium text-gray-900 mb-1">预警建议：</p>
-                      <p className="text-sm text-gray-600">
-                        {selectedPatient?.data.riskLevel === '极高危' ? '立即转入 ICU，启动多学科会诊，每 2 小时监测生命体征' :
-                         selectedPatient?.data.riskLevel === '中危' ? '加强病房监测，每 4 小时评估病情变化' :
-                         '常规病房监测，每日评估病情'}
-                      </p>
+                    <div className="text-xs text-primary/60 mt-2">
+                      {lang === 'zh' ? '关键特征：入院72小时内心率呈上升趋势，最低值85 bpm，最高值130 bpm' : 'Key feature: HR shows upward trend within 72h, min 85 bpm, max 130 bpm'}
                     </div>
                   </div>
 
-                  {/* 4. 循证诊疗方案 */}
-                  <div className="bg-[#E6F2FF] rounded-lg p-4">
+                  {/* Risk Prediction */}
+                  <div className="bg-accent/10 rounded-xl p-4 border border-accent/20">
+                    <h4 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      {lang === 'zh' ? '重症风险预测' : 'Severe Risk Prediction'}
+                    </h4>
                     <div className="flex items-center gap-2 mb-3">
-                      <FileText className="w-5 h-5 text-[#0066CC]" />
-                      <h4 className="font-semibold text-gray-900">循证诊疗方案</h4>
+                      <span className="px-3 py-1 bg-highlight/10 text-highlight text-sm font-bold rounded-full">{sampleReport.severity}</span>
+                      <span className="text-xs text-primary/60">{lang === 'zh' ? '预测概率' : 'Prediction'}: {sampleReport.riskScore * 100}%</span>
                     </div>
-                    <div className="space-y-3">
-                      {selectedPatient?.data.treatmentPlan.map((plan, index) => (
-                        <div key={index} className="bg-white rounded p-3">
-                          <p className="text-sm text-gray-900">{plan}</p>
-                          <button className="text-xs text-[#0066CC] underline mt-2">
-                            循证依据：2024 ACG 急性胰腺炎指南 #3.{index + 1}
-                          </button>
+                    <div className="bg-white rounded-lg p-3 border border-highlight/20">
+                      <div className="text-xs font-semibold text-highlight mb-1">{lang === 'zh' ? '预警建议' : 'Warning'}</div>
+                      <div className="text-xs text-slate-600">{lang === 'zh' ? '立即转入ICU，启动多学科会诊，每2小时监测生命体征' : 'Transfer to ICU immediately, start MDT consultation, monitor vitals every 2h'}</div>
+                    </div>
+                  </div>
+
+                  {/* Evidence-based Treatment */}
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <Stethoscope className="w-4 h-4" />
+                      {lang === 'zh' ? '循证诊疗方案' : 'Evidence-based Treatment'}
+                    </h4>
+                    <div className="space-y-2">
+                      {sampleReport.recommendations.map((rec, index) => (
+                        <div key={index} className="bg-white rounded-lg p-3 border border-blue-100">
+                          <div className="text-xs font-semibold text-blue-700 mb-1">{rec.title}</div>
+                          <div className="text-xs text-slate-600 mb-1">{rec.content}</div>
+                          <div className="text-xs text-blue-500">
+                            {lang === 'zh' ? '循证依据' : 'Evidence'}: {rec.guide}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* 5. 监测建议 */}
-                  <div className="bg-[#E6F2FF] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Eye className="w-5 h-5 text-[#0066CC]" />
-                      <h4 className="font-semibold text-gray-900">监测建议</h4>
-                    </div>
+                  {/* Monitoring Suggestions */}
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <Monitor className="w-4 h-4" />
+                      {lang === 'zh' ? '监测建议' : 'Monitoring Suggestions'}
+                    </h4>
                     <div className="space-y-2">
-                      {selectedPatient?.data.monitoringPlan.map((item, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#0066CC] mt-0.5 flex-shrink-0" />
-                          <p className="text-sm text-gray-900">{item}</p>
+                      {sampleReport.monitoring.map((item, index) => (
+                        <div key={index} className="flex items-start gap-2 text-xs text-slate-600">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
+                          <span>{item}</span>
                         </div>
                       ))}
                     </div>
@@ -724,128 +453,6 @@ export default function ProductDemo({ lang }: ProductDemoProps) {
             </div>
           </div>
         </div>
-
-        {/* 新手引导弹窗 */}
-        {showTutorial && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-large max-w-md w-full p-6 relative">
-              <button
-                onClick={() => setShowTutorial(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-[#0066CC]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-[#0066CC]">{tutorialStep + 1}/3</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {getTutorialContent().title}
-                </h3>
-                <p className="text-gray-600">
-                  {getTutorialContent().description}
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => tutorialStep > 0 ? setTutorialStep(tutorialStep - 1) : setShowTutorial(false)}
-                  className="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  {tutorialStep === 0 ? '跳过引导' : '上一步'}
-                </button>
-                <button
-                  onClick={nextTutorialStep}
-                  className="flex-1 py-3 bg-[#0066CC] hover:bg-[#004C99] text-white rounded-lg transition-colors"
-                >
-                  {tutorialStep === 2 ? '立即体验' : '下一步'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 照片上传模态框 */}
-        {showPhotoModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-large max-w-2xl w-full p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">选择面部照片</h3>
-                <button
-                  onClick={() => setShowPhotoModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-[#0066CC] transition-all"
-                    onClick={handlePhotoUpload}
-                  >
-                    <Camera className="w-12 h-12 text-gray-400" />
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-sm text-gray-500 text-center">
-                点击任意示例图片完成上传
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* 数据上传模态框 */}
-        {showDataModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-large max-w-2xl w-full p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">选择轨迹数据示例</h3>
-                <button
-                  onClick={() => setShowDataModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                {patients.map((patient, index) => (
-                  <div
-                    key={patient.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-[#0066CC] cursor-pointer transition-all"
-                    onClick={() => handleDataUpload(patient.data.heartRateData)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">示例 {index + 1}：{patient.type}</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          数据：{patient.data.heartRateData.join(', ')} bpm
-                        </p>
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        patient.riskLevel === 'high' ? 'bg-[#F5E6E6] text-[#C76B6B]' :
-                        patient.riskLevel === 'medium' ? 'bg-[#F0F4F5] text-[#9DB4C0]' :
-                        'bg-[#EDF5F1] text-[#7DAF9C]'
-                      }`}>
-                        {patient.riskLevel === 'high' ? '高危' :
-                         patient.riskLevel === 'medium' ? '中危' : '低危'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-sm text-gray-500 text-center">
-                点击任意示例文件自动填充数据
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
